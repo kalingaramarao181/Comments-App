@@ -68,6 +68,8 @@
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
+  background-color: white;
+  border-width: 0px;
 }
 .like-delete-container {
   display: flex;
@@ -81,4 +83,7 @@
 .delete-button {
   background-color: white;
   border-width: 0px;
+}
+.like-text-blue {
+  color: blue;
 }

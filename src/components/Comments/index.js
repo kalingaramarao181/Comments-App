@@ -5,7 +5,7 @@ import {formatDistanceToNow} from 'date-fns'
 
 import CommentItem from '../CommentItem'
 
-console.log(formatDistanceToNow(new Date()))
+const instantTimeDistance = formatDistanceToNow(new Date())
 
 const initialContainerBackgroundClassNames = [
   'amber',
@@ -23,23 +23,28 @@ class Comments extends Component {
   state = {
     name: '',
     comment: '',
-    commentsCount: 0,
-    commentsList: [],
+    commentsList: initialCommentsList,
+    backgroundColor: initialContainerBackgroundClassNames[0],
+    timeDistance: instantTimeDistance,
   }
 
   onAddComments = event => {
     event.preventDefault()
-    const {name, comment} = this.state
+    const randomNumber = Math.floor(Math.random() * 7)
+    const {name, comment, timeDistance} = this.state
     const newComment = {
       id: uuidv4(),
       name,
       comment,
-      isActive: false,
+      isLikeActive: false,
+      timeDistance,
     }
     this.setState(prevState => ({
       commentsList: [...prevState.commentsList, newComment],
       name: '',
       comment: '',
+      backgroundColor: initialContainerBackgroundClassNames[randomNumber],
+      timeDistance: prevState.timeDistance + 1,
     }))
   }
 
@@ -51,30 +56,45 @@ class Comments extends Component {
     this.setState({comment: event.target.value})
   }
 
+  toggleIsFavorite = id => {
+    this.setState(prevState => ({
+      commentsList: prevState.commentsList.map(eachComment => {
+        if (eachComment.id === id) {
+          console.log(id)
+          return {...eachComment, isLikeActive: !eachComment.isLikeActive}
+        }
+        return eachComment
+      }),
+    }))
+  }
+
   onDeleteCommentsList = id => {
-    const filteredList = initialCommentsList.filter(
-      eachComment => eachComment.id === id,
+    const {commentsList} = this.state
+    const filteredList = commentsList.filter(
+      eachComment => eachComment.id !== id,
     )
     this.setState({commentsList: filteredList})
   }
 
   render() {
-    const {commentsList} = this.state
+    const {commentsList, name, comment, backgroundColor} = this.state
+    const count = commentsList.length
 
     return (
       <div className="top-container">
         <h1 className="heading">Comments</h1>
         <div className="form-img-container">
           <form className="form-container" onSubmit={this.onAddComments}>
-            <label htmlFor="comment" className="label-text">
-              Say something about 4.0 Technologies
-            </label>
+            <p htmlFor="comment" className="label-text">
+              Say Something about 4.0 Technologies
+            </p>
             <input
               onChange={this.onChangeName}
               placeholder="Your Name"
               className="input"
               id="comment"
               type="text"
+              value={name}
             />
             <textarea
               onChange={this.onChangeComment}
@@ -82,6 +102,7 @@ class Comments extends Component {
               className="textarea"
               rows="10"
               cols="50"
+              value={comment}
             />
             <button className="submit-button" type="submit">
               Add Comment
@@ -96,13 +117,17 @@ class Comments extends Component {
         <hr className="line" />
         <div className="bottom-container">
           <p className="comments-title">
-            <span className="comments-counter">0</span> Comments
+            <span className="comments-counter">{count}</span> Comments
           </p>
           <ul>
             {commentsList.map(eachItem => (
               <CommentItem
+                toggleIsFavorite={this.toggleIsFavorite}
                 commentDetails={eachItem}
                 onDeleteCommentsList={this.onDeleteCommentsList}
+                count={count}
+                backgroundColor={backgroundColor}
+                key={eachItem.id}
               />
             ))}
           </ul>
